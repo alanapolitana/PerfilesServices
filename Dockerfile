@@ -10,6 +10,9 @@ COPY requirements.txt /Perfiles/
 # Instala las dependencias antes de copiar todo el código
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copia el archivo .env para las variables de entorno
+COPY .env /Perfiles/.env
+
 # Copia todos los archivos al contenedor después de instalar dependencias
 COPY . .
 
