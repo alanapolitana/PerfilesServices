@@ -41,8 +41,8 @@ DEBUG = True
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 
-ALLOWED_HOSTS = ['*']
-# Application definition
+ALLOWED_HOSTS = ["alparque.onrender.com", "localhost", "127.0.0.1"]
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -80,6 +80,7 @@ CORS_ORIGIN_WHITELIST = ['http://localhost:4200']
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200",  # Angular
     "http://localhost:8000",  # Django
+    "https://alparque.onrender.com"
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 
