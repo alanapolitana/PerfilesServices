@@ -25,17 +25,9 @@ load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
-# Configuración de la base de datos
 DATABASES = {
     'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
-
-# Agrega explícitamente el puerto si es necesario
-DATABASES['default'].update({
-    'PORT': os.getenv('PORT', 5432)  # Si no existe PORT, usará el valor 5432
-})
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
