@@ -29,6 +29,16 @@ DATABASES = {
     'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
 
+
+# Si tienes configuraciones adicionales para otras variables:
+DATABASES['default'].update({
+    'USER': os.getenv('USER', 'default_user'),
+    'PASSWORD': os.getenv('PASSWORD', 'default_password'),
+    'HOST': os.getenv('HOST', 'localhost'),
+    'PORT': os.getenv('PORT', 5432),
+})
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
