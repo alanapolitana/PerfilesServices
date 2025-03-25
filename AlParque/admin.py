@@ -126,7 +126,7 @@ class ActividadUsuarioAdmin(admin.ModelAdmin):
 
 # Configuración personalizada para el modelo ActividadUsuario
 class ActividadUsuarioAdmin(admin.ModelAdmin):
-    list_display = ('actividad', 'user', 'integranteDesde', 'aprobado')  # Asegúrate de usar 'integranteDesde' en lugar de 'fecha_participacion'
+    list_display = ('actividad', 'user', 'integranteDesde', 'aprobado') 
     list_filter = ('actividad', 'user', 'aprobado')
     search_fields = ('actividad__nombre', 'user__email')
 

@@ -1,16 +1,10 @@
 from rest_framework import serializers
 from .models import Parque, Actividad, ActividadUsuario
-from rest_framework import serializers
-from .models import Parque
-
-from Usuarios.serializers import UserSerializer
-
-
 
 class ParqueSerializer(serializers.ModelSerializer):
     class Meta:
         model = Parque
-        fields = ['id','nombre', 'descripcion', 'ubicacion', 'imagenes', 'comentarios']
+        fields = ['id','nombre', 'descripcion', 'ubicacion', 'imagenes', 'comentarios','habilitado']
 
     # Si las imágenes son archivos, manejarlas con ImageField
     imagenes = serializers.ListField(child=serializers.CharField())
@@ -36,14 +30,16 @@ class ActividadSerializer(serializers.ModelSerializer):
         instance.save()
         return 
     
-from rest_framework import serializers
-from .models import ActividadUsuario, Actividad, User
 
+""" 
 class ActividadUsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = ActividadUsuario
-        fields = ['actividad', 'user', 'integranteDesde', 'aprobado']
+        fields = ['id', 'actividad', 'user', 'integranteDesde', 'aprobado', 'administrador']
+ """
+class ActividadUsuarioSerializer(serializers.ModelSerializer):
+    actividad = ActividadSerializer(read_only=True)  # Usar el serializer de actividad
 
-    def create(self, validated_data):
-        # Aquí puedes agregar lógica adicional si es necesario.
-        return ActividadUsuario.objects.create(**validated_data)
+    class Meta:
+        model = ActividadUsuario
+        fields = '__all__'

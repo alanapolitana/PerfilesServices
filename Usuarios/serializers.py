@@ -1,78 +1,73 @@
 from rest_framework import serializers
-
 from .models import Role, User,BMI
-
-
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer 
-
 from decimal import Decimal
 from django.utils import timezone
-
 import cloudinary
-
 from django.contrib.auth import authenticate
-
-""" class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id','username', 'first_name', 'last_name', 'email', 'password', 'address', 'phone', 'image',]
-        extra_kwargs = {'password': {'write_only': True}}
-
-    def create(self, validated_data):
-        user = User.objects.create(
-            username=validated_data.get('username', ''),      # Opcional
-            first_name=validated_data.get('first_name', ''),  # Opcional
-            last_name=validated_data.get('last_name', ''),    # Opcional
-            email=validated_data['email'],
-            address=validated_data.get('address', ''),        # Opcional
-            phone=validated_data.get('phone', ''),            # Opcional
-            image=validated_data.get('image'),                 # Opcional
-        )
-        user.set_password(validated_data['password'])
-        user.save()
-        return user """
+import cloudinary.uploader
+import time
 class UserSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(required=False)
+    gender = serializers.ChoiceField(choices=User.GENDER_CHOICES, required=False)
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password', 'address', 'phone', 'image']
+        fields = ['id', 'email', 'first_name', 'last_name', 'phone', 'image', 'gender']
         extra_kwargs = {'password': {'write_only': True}}
-
-    def create(self, validated_data):
-        imagenes = validated_data.pop('image', [])
-        
-        # 🔥 CIFRAR LA CONTRASEÑA CORRECTAMENTE
-        password = validated_data.pop('password', None)
-        user = User(**validated_data)
-        
-        if password:
-            user.set_password(password)  # 🔒 Cifrar la contraseña antes de guardar
-        user.save()
-
-        # Guardar imágenes si están disponibles
-        urls = []
-        for imagen in imagenes:
-            resultado = cloudinary.uploader.upload(imagen)
-            urls.append(resultado.get('secure_url'))
-        user.image = urls  
-        user.save()
-        
-        return user
-
 
     def update(self, instance, validated_data):
-        instance.username = validated_data.get('username', instance.username)
         instance.first_name = validated_data.get('first_name', instance.first_name)
         instance.last_name = validated_data.get('last_name', instance.last_name)
-        instance.address = validated_data.get('address', instance.address)
         instance.phone = validated_data.get('phone', instance.phone)
-        instance.image = validated_data.get('image', instance.image)
+        instance.gender = validated_data.get('gender', instance.gender)  
 
-        password = validated_data.get('password', None)
-        if password:
-            instance.set_password(password)
-        
+        # Subir la imagen solo si se proporciona una nueva
+        image = validated_data.get('image', None)
+        if image:
+            resultado = cloudinary.uploader.upload(image, public_id=f"user_{instance.id}_{int(time.time())}", overwrite=True)
+            new_image_url = resultado.get('secure_url')
+
+            if new_image_url:
+                instance.image = new_image_url
+
         instance.save()
         return instance
+
+
+
+""" class UserSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'first_name', 'last_name', 'address', 'phone', 'image']
+
+    def get_image(self, obj):
+        if obj.image:
+            return obj.image.url if obj.image.url.startswith('http') else f"https://res.cloudinary.com/dhufclese{obj.image.url}"
+        return None """
+
+class UserRegisterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password', 'phone', 'image']
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        password = validated_data.pop('password', None)
+        image = validated_data.pop('image', None)  # Extraer imagen
+        user = User(**validated_data)
+        if password:
+            user.set_password(password)
+        user.save()
+
+        if image:
+            resultado = cloudinary.uploader.upload(image)
+            user.image = resultado.get('secure_url')
+            user.save()
+        
+        return user
 
 
 class LogoutSerializer(serializers.Serializer):
@@ -80,21 +75,6 @@ class LogoutSerializer(serializers.Serializer):
 
 
 
-""" class LogoutSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=True)
-    password = serializers.CharField(required=True, write_only=True)
-
-    def validate(self, attrs):
-        email = attrs.get('email')
-        password = attrs.get('password')
-
-        # Autenticación de usuario
-        user = authenticate(email=email, password=password)
-
-        if user is None:
-            raise serializers.ValidationError({"error": "No existe este usuario o las credenciales son incorrectas."})
-        
-        return attrs """
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):

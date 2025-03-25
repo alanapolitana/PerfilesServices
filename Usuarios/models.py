@@ -5,7 +5,7 @@ from django.forms import ValidationError
 from django.utils.timezone import now
 from django.utils import timezone
 import cloudinary.uploader
-
+from cloudinary.models import CloudinaryField
 
 # --- Manager personalizado para el modelo User ---
 class UserManager(BaseUserManager):
@@ -26,21 +26,21 @@ class UserManager(BaseUserManager):
             raise ValueError('Superuser must have is_staff=True.')
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
-        return self.create_user(email, password, role, **extra_fields)
-
-
-# --- Modelo User ---
+        return self.create_user(email, password, role, **extra_fields)# --- Manager personalizado para el modelo User ---
 class User(AbstractBaseUser, PermissionsMixin):
     id = models.AutoField(primary_key=True)
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=30, default='', blank=False, null=True)
     first_name = models.CharField(max_length=30, default='', blank=False)
     last_name = models.CharField(max_length=30, default='', blank=False)
-    address = models.CharField(max_length=255, default='', blank=False)
     phone = models.CharField(max_length=20, default='', blank=False)
-    image = models.ImageField(upload_to='images/', blank=True, null=True)
-    #imagenes = models.FileField(upload_to='Alparque/parques')  # Puedes guardar una lista de URLs de imágenes
-   # image = models.JSONField(default=list, blank=True, null=True)  # Almacenamiento de URLs de imágenes
+    image = CloudinaryField('image', null=True, blank=True)
+
+    GENDER_CHOICES = [
+        ('Masculino', 'Masculino'),
+        ('Femenino', 'Femenino'),
+    ]
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, default='Masculino')
 
     date_joined = models.DateTimeField(default=timezone.now)
     is_staff = models.BooleanField(default=False)
@@ -51,12 +51,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     actividad = models.ForeignKey(
         'AlParque.Actividad',
         on_delete=models.CASCADE,
-        related_name='usuarios',  # Este es el nombre único de la consulta inversa
+        related_name='usuarios',
         null=True,
         blank=True
     )
 
-    # Cambiar nombres de relaciones inversas
     groups = models.ManyToManyField(Group, related_name='custom_user_set', blank=True)
     user_permissions = models.ManyToManyField('auth.Permission', related_name='custom_user_permissions_set', blank=True)
 
@@ -66,7 +65,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = []
 
     def __str__(self):
-        return self.email
+        return f"{self.first_name} {self.last_name} ({self.email}) - Rol: {self.role.name if self.role else 'Sin rol'}"
 
     class Meta:
         db_table = 'user'
@@ -84,7 +83,7 @@ class Role(models.Model):
         verbose_name_plural = 'Roles'
 
     def __str__(self):
-        return self.name
+        return self.name if self.name else "Sin nombre"
 
 def validate_positive(value):
     """Validator to ensure the value is positive."""

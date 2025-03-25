@@ -10,7 +10,7 @@ from rest_framework.generics import GenericAPIView, RetrieveUpdateAPIView
 from django.contrib.auth import authenticate
 
 from Usuarios.bmi_chart import generate_bmi_dataframe
-from .serializers import RoleSerializer, UserSerializer, CustomTokenObtainPairSerializer, LogoutSerializer,BMISerializer
+from .serializers import RoleSerializer, UserRegisterSerializer, UserSerializer, CustomTokenObtainPairSerializer, LogoutSerializer,BMISerializer
 from .models import Role, User,BMI
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import ModelViewSet
@@ -33,11 +33,23 @@ from reportlab.pdfgen import canvas
 from django.http import HttpResponse
 from io import BytesIO
 import cloudinary
+
+from rest_framework import viewsets
+from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
+from .models import User
+from .serializers import UserSerializer
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status
+
+
 class RegisterView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request, *args, **kwargs):
-        serializer = UserSerializer(data=request.data)
+        serializer = UserRegisterSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -65,15 +77,6 @@ class Login(TokenObtainPairView):
             return Response({'error': 'Contraseña o nombre de usuario incorrectos'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'error': 'Contraseña o nombre de usuario incorrectos'}, status=status.HTTP_400_BAD_REQUEST)
 
-""" class Login(TokenObtainPairView):
-    serializer_class = CustomTokenObtainPairSerializer
-
-    def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid():
-            return Response(serializer.validated_data, status=status.HTTP_200_OK)
-        return Response({"error": "Correo o contraseña incorrectos"}, status=status.HTTP_400_BAD_REQUEST)
- """
 class Logout(GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = LogoutSerializer
@@ -85,29 +88,42 @@ class Logout(GenericAPIView):
             return Response({'message': 'Sesión cerrada correctamente.'}, status=status.HTTP_200_OK)
         return Response({'error': 'No existe este usuario.'}, status=status.HTTP_400_BAD_REQUEST)
 
-from rest_framework import viewsets
-from rest_framework.response import Response
-from rest_framework.parsers import MultiPartParser, FormParser
-from .models import User
-from .serializers import UserSerializer
-from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework import status
+
 
 class UserUpdateView(APIView):
-    parser_classes = [MultiPartParser, FormParser]
-
     def patch(self, request):
         user = request.user
-        image = request.data.get('image')
+        serializer = UserSerializer(user, data=request.data, partial=True)
+        
+        print("Archivos recibidos:", request.FILES)  # Verifica si la imagen llega
 
-        if image:
-            user.image = image
-            user.save()
-            return Response({"image": user.image.url}, status=status.HTTP_200_OK)
+        if serializer.is_valid():
+            # Procesar la imagen si está presente
+            image = request.FILES.get('image')
+            if image:
+                print("Subiendo imagen a Cloudinary...")
+                try:
+                    resultado = cloudinary.uploader.upload(image)
+                    print("Resultado de Cloudinary:", resultado)  # Verifica toda la respuesta
 
-        return Response({"image": ["Este campo es requerido."]}, status=status.HTTP_400_BAD_REQUEST)
+                    secure_url = resultado.get('secure_url')
+                    if secure_url:
+                        print("URL obtenida de Cloudinary:", secure_url)
+                        user.image = secure_url  # Asigna la URL a la imagen del usuario
+                        user.save()  # Guarda el usuario con la nueva imagen
+                        print("Imagen guardada en el modelo:", user.image)
+                    else:
+                        print("Error: Cloudinary no devolvió secure_url")
+                        return Response({"error": "No se pudo obtener la URL de Cloudinary"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                
+                except Exception as e:
+                    print("Error al subir la imagen a Cloudinary:", str(e))
+                    return Response({"error": "Error al subir la imagen"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            return Response({"id": user.id, "image": user.image}, status=status.HTTP_200_OK)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+from rest_framework.parsers import MultiPartParser, FormParser
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -115,57 +131,24 @@ class UserViewSet(viewsets.ModelViewSet):
     parser_classes = [MultiPartParser, FormParser]
 
     def create(self, request, *args, **kwargs):
-        imagenes_urls = []
+        if 'image' in request.FILES:
+            imagen = request.FILES['image']
+            resultado = cloudinary.uploader.upload(imagen)
+            request.data['image'] = resultado['secure_url']  # Solo una URL, no lista
 
-        if request.FILES.getlist('image'):
-            for imagen in request.FILES.getlist('image'):
-                resultado = cloudinary.uploader.upload(imagen)
-                imagenes_urls.append(resultado['secure_url'])
-
-        # Combinar imágenes en la data original
-        data = request.data.dict()
-        data['image'] = imagenes_urls
-
-        serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        return Response(serializer.data)
+        return super().create(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        data = request.data.copy()
-
-        image_urls = instance.image or []
+        
         if 'image' in request.FILES:
-            for imagen in request.FILES.getlist('image'):
-                resultado = cloudinary.uploader.upload(imagen)
-                imagenes_urls.append(resultado['secure_url'])
+            imagen = request.FILES['image']
+            resultado = cloudinary.uploader.upload(imagen)
+            request.data['image'] = resultado['secure_url']
 
-        data['image'] = image_urls
+        return super().update(request, *args, **kwargs)
 
-        serializer = self.get_serializer(instance, data=data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response(serializer.data)
 
- 
-""" from .serializers import LogoutSerializer
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
-from django.contrib.auth import logout
-class Logout(APIView):
-    def post(self, request):
-        # Serializamos los datos del request
-        serializer = LogoutSerializer(data=request.data)
-
-        if serializer.is_valid():
-            # Realizamos el logout del usuario
-            logout(request)
-            return Response({"message": "Cierre de sesión exitoso."}, status=HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
-         """
 class UserView(RetrieveUpdateAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
@@ -195,13 +178,50 @@ class RoleViewSet(ModelViewSet):
     serializer_class = RoleSerializer
     permission_classes = [IsAdminUser]
 
-""" class BMICreateAPIView(generics.CreateAPIView):
 
-    serializer_class = BMISerializer
-    permission_classes = [permissions.AllowAny]
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user) """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class BMICreateAPIView(generics.CreateAPIView):
     """
