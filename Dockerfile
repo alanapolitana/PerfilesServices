@@ -13,18 +13,18 @@ COPY requirements.txt /Perfiles/
 # Instala las dependencias antes de copiar todo el código
 RUN pip install --no-cache-dir -r requirements.txt
 
+
+
 # Copia todos los archivos al contenedor después de instalar dependencias
 COPY . .
 
 # Crea el directorio de logs
 RUN mkdir -p /Perfiles/logs
 
-# Espera a que la base de datos esté lista antes de ejecutar las migraciones
-RUN wait-for-it $MYSQL_HOST:$MYSQL_PORT --timeout=30 -- python manage.py makemigrations
-RUN wait-for-it $MYSQL_HOST:$MYSQL_PORT --timeout=30 -- python manage.py migrate
+RUN python manage.py makemigrations && \
+    python manage.py migrate && \
+    python manage.py collectstatic --noinput
 
-# Ejecuta collectstatic después de las migraciones
-RUN python manage.py collectstatic --noinput
 
 # Expone el puerto de la aplicación
 EXPOSE 8000
