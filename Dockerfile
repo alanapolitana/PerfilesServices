@@ -4,14 +4,16 @@ FROM python:3.12
 # Establece el directorio de trabajo en /Perfiles
 WORKDIR /Perfiles
 
+# Copia el archivo .env para las variables de entorno
+COPY .env /Perfiles/.env
+
 # Copia solo los archivos esenciales para aprovechar la caché de Docker
 COPY requirements.txt /Perfiles/
 
 # Instala las dependencias antes de copiar todo el código
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copia el archivo .env para las variables de entorno
-COPY .env /Perfiles/.env
+
 
 # Copia todos los archivos al contenedor después de instalar dependencias
 COPY . .
