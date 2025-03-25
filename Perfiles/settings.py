@@ -22,11 +22,19 @@ from dotenv import load_dotenv
 import cloudinary_storage
 
 load_dotenv()
+WSGI_APPLICATION = 'Perfiles.wsgi.application'
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = 'django-insecure-nd=r3seft$ul_uln3m52*2s91mceq^tmyn)%@kt+g56xdb_#db'
+
+
+ALLOWED_HOSTS = ['*']
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+# Database
 DATABASES = {
-    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
+    'default': dj_database_url.config(default=os.getenv('DATABASE_URL')) 
 }
 
 # Quick-start development settings - unsuitable for production
@@ -40,9 +48,9 @@ DEBUG = True
 # En settings.py
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
-
+""" 
 ALLOWED_HOSTS = ["alparque.onrender.com", "localhost", "127.0.0.1"]
-
+ """
 
 INSTALLED_APPS = [
     'django.contrib.admin',
