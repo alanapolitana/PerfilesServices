@@ -1,5 +1,6 @@
 
 from django.contrib import admin
+from django.shortcuts import redirect
 from django.urls import path,include
 from django.urls import re_path
 from rest_framework import permissions
@@ -59,6 +60,8 @@ urlpatterns = [
 
 
 urlpatterns = [
+   
+  path('', lambda request: redirect('admin/')),  # Redirección de '/'
   path('admin/', admin.site.urls),
   path('api/', include('Usuarios.urls')),    
   path('api/', include('AlParque.urls')),
