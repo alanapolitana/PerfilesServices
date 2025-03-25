@@ -21,9 +21,16 @@ COPY . .
 # Crea el directorio de logs
 RUN mkdir -p /Perfiles/logs
 
-RUN python manage.py makemigrations && \
-    python manage.py migrate && \
-    python manage.py collectstatic --noinput
+
+# Comando para recopilar archivos estáticos
+RUN python manage.py collectstatic --noinput
+
+# Genera las migraciones automáticamente
+RUN python manage.py makemigrations
+
+# Ejecuta las migraciones automáticamente
+RUN python manage.py migrate
+
 
 
 # Expone el puerto de la aplicación
