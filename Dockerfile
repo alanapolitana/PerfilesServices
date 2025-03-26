@@ -13,8 +13,8 @@ COPY requirements.txt /Perfiles/
 # Instala las dependencias antes de copiar todo el código
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Instalar netcat (nc)
-RUN apt-get update && apt-get install -y netcat
+# Instalar netcat-openbsd (nc)
+RUN apt-get update && apt-get install -y netcat-openbsd
 
 # Copia todos los archivos al contenedor después de instalar dependencias
 COPY . .
