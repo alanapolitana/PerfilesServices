@@ -38,10 +38,24 @@ class ActividadUsuarioSerializer(serializers.ModelSerializer):
         fields = ['id', 'actividad', 'user', 'integranteDesde', 'aprobado', 'administrador']
  """
 class ActividadUsuarioSerializer(serializers.ModelSerializer):
-    actividad = ActividadSerializer(read_only=True)  # Usar el serializer de actividad
+    actividad = ActividadSerializer(read_only=True)  # Mostrar los detalles de la actividad
     actividad_id = serializers.PrimaryKeyRelatedField(
-        queryset=Actividad.objects.all(), write_only=True  # Para escritura
+        queryset=Actividad.objects.all(), write_only=True  # Solo se usará al escribir (crear o actualizar)
     )
+    
     class Meta:
         model = ActividadUsuario
         fields = '__all__'
+    
+    def create(self, validated_data):
+        # Extraemos el ID de actividad del validated_data y lo asignamos manualmente
+        actividad_id = validated_data.pop('actividad_id')
+        actividad = Actividad.objects.get(id=actividad_id)
+        
+        # Creamos la instancia de ActividadUsuario con el ID de actividad
+        actividad_usuario = ActividadUsuario.objects.create(
+            actividad=actividad,
+            **validated_data
+        )
+        return actividad_usuario
+
