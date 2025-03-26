@@ -14,7 +14,6 @@ COPY requirements.txt /Perfiles/
 RUN pip install --no-cache-dir -r requirements.txt
 
 
-
 # Instala el cliente de PostgreSQL
 RUN apt-get update && apt-get install -y postgresql-client
 # Copia todos los archivos al contenedor después de instalar dependencias
@@ -35,11 +34,11 @@ RUN python manage.py makemigrations
 
 # Ejecuta las migraciones automáticamente
 RUN python manage.py migrate
-# Ejecuta los scripts SQL para inicializar las bases de datos
-RUN psql -h postgres_db -U $POSTGRES_USER -d alparque_db -f /Perfiles/Usuarios/initial_data.sql
-RUN psql -h postgres_db -U $POSTGRES_USER -d usuarios_db -f /Perfiles/AlParque/initial_data.sql
 
-
+# Ejecuta los scripts SQL para inicializar las bases de datos usando la URL de la base de datos
+# Usamos la variable DATABASE_URL para conectarnos
+RUN psql $DATABASE_URL -f /Perfiles/Usuarios/initial_data.sql
+RUN psql $DATABASE_URL -f /Perfiles/AlParque/initial_data.sql
 
 # Expone el puerto de la aplicación
 EXPOSE 8000
