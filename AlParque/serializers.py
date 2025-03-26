@@ -39,7 +39,9 @@ class ActividadUsuarioSerializer(serializers.ModelSerializer):
  """
 class ActividadUsuarioSerializer(serializers.ModelSerializer):
     actividad = ActividadSerializer(read_only=True)  # Usar el serializer de actividad
-
+    actividad_id = serializers.PrimaryKeyRelatedField(
+        queryset=Actividad.objects.all(), write_only=True  # Para escritura
+    )
     class Meta:
         model = ActividadUsuario
         fields = '__all__'
