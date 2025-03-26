@@ -13,8 +13,7 @@ COPY requirements.txt /Perfiles/
 # Instala las dependencias antes de copiar todo el código
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Instalar netcat-openbsd (nc)
-RUN apt-get update && apt-get install -y netcat-openbsd
+
 
 # Copia todos los archivos al contenedor después de instalar dependencias
 COPY . .
@@ -22,21 +21,17 @@ COPY . .
 # Crea el directorio de logs
 RUN mkdir -p /Perfiles/logs
 
+
 # Comando para recopilar archivos estáticos
 RUN python manage.py collectstatic --noinput
 
 # Genera las migraciones automáticamente
 RUN python manage.py makemigrations
 
-# Copia el script de espera
-COPY wait-for-db.sh /usr/local/bin/wait-for-db.sh
-RUN chmod +x /usr/local/bin/wait-for-db.sh
-
-# Espera a que la base de datos esté lista y luego realiza las migraciones
-RUN /usr/local/bin/wait-for-db.sh postgres_db
-
 # Ejecuta las migraciones automáticamente
 RUN python manage.py migrate
+
+
 
 # Expone el puerto de la aplicación
 EXPOSE 8000
