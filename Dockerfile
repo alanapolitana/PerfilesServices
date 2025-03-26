@@ -21,9 +21,9 @@ COPY . .
 # Crea el directorio de logs
 RUN mkdir -p /Perfiles/logs
 
-# Copia los archivos SQL necesarios para inicializar las bases de datos
-COPY initial_data.sql /Perfiles/Usuarios/initial_data.sql
-COPY initial_data.sql /Perfiles/AlParque/initial_data.sql
+#Copia los archivos SQL necesarios para inicializar las bases de datos
+COPY Usuarios/initial_data.sql /Perfiles/Usuarios/initial_data.sql
+COPY AlParque/initial_data.sql /Perfiles/AlParque/initial_data.sql
 
 # Comando para recopilar archivos estáticos
 RUN python manage.py collectstatic --noinput
