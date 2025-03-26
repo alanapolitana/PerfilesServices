@@ -1,37 +1,63 @@
-INSERT INTO alparque_parque (nombre, descripcion, imagenes, ubicacion, comentarios)
+-- Insertar en la tabla alparque_parque
+INSERT INTO alparque_parque (nombre, descripcion, imagenes, habilitado, ubicacion, comentarios)
 VALUES 
 ('Parque Las Heras', 
  'Un espacio verde ubicado a orillas del río Suquía, ideal para caminatas y actividades recreativas.', 
  '["lasheras1.jpg", "lasheras2.jpg"]', 
+ TRUE, 
  'Av. Costanera Norte, Córdoba, Argentina', 
  'Perfecto para disfrutar de la naturaleza cerca del centro de la ciudad.'),
 
 ('Parque Sarmiento', 
  'El parque más grande de la ciudad de Córdoba, con áreas recreativas, senderos y lagunas.', 
  '["sarmiento1.jpg", "sarmiento2.jpg"]', 
+ TRUE, 
  'Av. Deodoro Roca, Córdoba, Argentina', 
  'Un sitio icónico para actividades recreativas y eventos deportivos.'),
 
 ('Parque Autóctono', 
  'Un espacio que preserva la flora y fauna autóctonas de la región de Córdoba.', 
  '["autoctono1.jpg", "autoctono2.jpg"]', 
+ TRUE, 
  'B° Cerro de las Rosas, Córdoba, Argentina', 
  'Excelente opción para caminatas en contacto con la naturaleza.'),
 
 ('Reserva Natural San Martín', 
  'Una reserva que ofrece senderos naturales y avistamiento de fauna.', 
  '["sanmartin1.jpg", "sanmartin2.jpg"]', 
+ TRUE, 
  'Av. Ejército Argentino 2000, Córdoba, Argentina', 
- 'Ideal para actividades educativas y contacto con la naturaleza.');
+ 'Ideal para actividades educativas y contacto con la naturaleza.'),
 
+('Parque Central', 
+ 'Un gran parque en el centro de la ciudad, ideal para caminar y hacer picnic.', 
+ '["image1.jpg", "image2.jpg"]', 
+ TRUE, 
+ 'Centro de la Ciudad', 
+ 'Un parque muy popular entre los ciudadanos.'),
 
+('Parque Natural', 
+ 'Un parque rodeado de naturaleza, ideal para hacer senderismo y observar aves.', 
+ '["image3.jpg", "image4.jpg"]', 
+ TRUE, 
+ 'Zona Rural', 
+ 'Un lugar tranquilo y lleno de vida silvestre.'),
+
+('Parque Deportivo', 
+ 'Parque dedicado al deporte, con canchas de tenis, fútbol y baloncesto.', 
+ '["image5.jpg", "image6.jpg"]', 
+ TRUE, 
+ 'Zona Deportiva', 
+ 'El parque más visitado por los deportistas locales.');
+
+-- Insertar en la tabla alparque_actividad
 INSERT INTO alparque_actividad (nombre, descripcion, imagenes, instagram, website, telefono, integrantes, administrador, habilitado, comentarios, parque_id)
 VALUES
 ('Basket', 
- 'Actividad ideal para divertirse en grupo , veni a tomar unos mates y jugar unos partiditos', 
- '["senderismo1.jpg", "senderismo2.jpg"]', 
+ 'Actividad ideal para divertirse en grupo, vení a tomar unos mates y jugar unos partiditos.', 
+ '["basket1.jpg", "basket2.jpg"]', 
  'https://instagram.com/lasherasbasket', 
- null, 
+ NULL, 
  '123-456-7890', 
  10, 
  TRUE, 
@@ -52,9 +78,9 @@ VALUES
  2),
 
 ('Acrobacias en tela', 
- 'Acrobacias en tela seguras, veni  a conocer, primer clase gratis.', 
- '["camping1.jpg", "camping2.jpg"]', 
- 'https://instagram.com/camping_cba', 
+ 'Acrobacias en tela seguras, vení a conocer, primera clase gratis.', 
+ '["tela1.jpg", "tela2.jpg"]', 
+ 'https://instagram.com/acrobacias_cba', 
  NULL, 
  '555-123-4567', 
  15, 
@@ -63,21 +89,57 @@ VALUES
  'Incluye zonas habilitadas con servicios básicos.', 
  3),
 
+('Senderismo', 
+ 'Actividad de senderismo en el Parque Natural.', 
+ '["senderismo1.jpg", "senderismo2.jpg"]', 
+ 'https://instagram.com/senderismo', 
+ 'https://senderismo.com', 
+ '123-456-789', 
+ NULL, 
+ NULL, 
+ TRUE, 
+ 'Actividad tranquila y en contacto con la naturaleza.', 
+ 2),
+
+('Fútbol', 
+ 'Partidos de fútbol en el Parque Deportivo.', 
+ '["futbol1.jpg", "futbol2.jpg"]', 
+ 'https://instagram.com/futbol', 
+ 'https://futbol.com', 
+ '123-456-789', 
+ NULL, 
+ NULL, 
+ TRUE, 
+ 'Competencia abierta a todos los niveles.', 
+ 3),
+
+('Picnic', 
+ 'Actividad de picnic en el Parque Central.', 
+ '["picnic1.jpg", "picnic2.jpg"]', 
+ 'https://instagram.com/picnic', 
+ 'https://picnic.com', 
+ '123-456-789', 
+ NULL, 
+ NULL, 
+ TRUE, 
+ 'Un espacio relajado para disfrutar con amigos y familiares.', 
+ 1),
+
 ('Avistamiento de Aves', 
  'Actividad educativa para conocer la fauna local.', 
  '["aves1.jpg", "aves2.jpg"]', 
- NULL, 
- NULL, 
+ 'https://instagram.com/aves', 
+ 'https://aves.com', 
  '222-987-6543', 
- 8, 
- FALSE, 
+ NULL, 
+ NULL, 
  TRUE, 
  'Incluye guía especializada.', 
- 4);
+ 2);
 
 
-INSERT INTO actividad_usuario (actividad_id, user_id, fecha_participacion)
+INSERT INTO actividad_usuario (actividad_id, user_id, aprobado, administrador, integranteDesde)
 VALUES
-(1, 1, '2025-01-27 10:00:00'),
-(1, 2, '2025-01-27 10:05:00'),
-(3, 1, '2025-02-05 14:30:00');
+    (1, 1, TRUE, FALSE, '2024-01-01'), 
+    (2, 1, TRUE, TRUE, '2024-01-01'), 
+    (3, 1, TRUE, FALSE, '2024-01-01'); 
