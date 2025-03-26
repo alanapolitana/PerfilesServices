@@ -15,6 +15,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 
 
+# Instala el cliente de PostgreSQL
+RUN apt-get update && apt-get install -y postgresql-client
 # Copia todos los archivos al contenedor después de instalar dependencias
 COPY . .
 
