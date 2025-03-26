@@ -21,6 +21,9 @@ COPY . .
 # Crea el directorio de logs
 RUN mkdir -p /Perfiles/logs
 
+# Copia los archivos SQL necesarios para inicializar las bases de datos
+COPY initial_data.sql /Perfiles/Usuarios/initial_data.sql
+COPY initial_data.sql /Perfiles/AlParque/initial_data.sql
 
 # Comando para recopilar archivos estáticos
 RUN python manage.py collectstatic --noinput
@@ -30,6 +33,9 @@ RUN python manage.py makemigrations
 
 # Ejecuta las migraciones automáticamente
 RUN python manage.py migrate
+# Ejecuta los scripts SQL para inicializar las bases de datos
+RUN psql -h postgres_db -U $POSTGRES_USER -d alparque_db -f /Perfiles/Usuarios/initial_data.sql
+RUN psql -h postgres_db -U $POSTGRES_USER -d usuarios_db -f /Perfiles/AlParque/initial_data.sql
 
 
 
