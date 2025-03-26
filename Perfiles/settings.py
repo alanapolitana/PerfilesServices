@@ -51,7 +51,13 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 """ 
 ALLOWED_HOSTS = ["alparque.onrender.com", "localhost", "127.0.0.1"]
  """
-
+CORS_ALLOWED_ORIGINS = [
+    "https://al-parque-git-mvp-marco-virinnis-projects.vercel.app",
+    "https://al-parque.vercel.app",
+    "http://localhost:4200",  # Angular
+    "http://localhost:8000",  # Django
+    "https://alparque.onrender.com"
+]
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -85,11 +91,7 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 CORS_ORIGIN_WHITELIST = ['http://localhost:4200']
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:4200",  # Angular
-    "http://localhost:8000",  # Django
-    "https://alparque.onrender.com"
-]
+
 CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_CREDENTIALS = True
