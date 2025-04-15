@@ -19,7 +19,6 @@ class Actividad(models.Model):
     imagenes = models.JSONField(default=list, blank=True)
     instagram = models.URLField(blank=True, null=True)
     website = models.URLField(blank=True, null=True)
-    telefono = models.CharField(max_length=20, blank=True, null=True)
     habilitado = models.BooleanField(default=False)
     comentarios = models.TextField(blank=True, null=True)
     parque = models.ForeignKey(Parque, on_delete=models.CASCADE, related_name='actividades')
